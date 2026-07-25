@@ -47,6 +47,24 @@ export default class UIManager {
     }).setDepth(31).setInteractive({ useHandCursor: true });
     pauseBtn.on('pointerdown', () => scene.togglePause());
 
+    // ── 3B. FULLSCREEN BUTTON (Top-Right next to Pause) ──
+    const fsX = pauseX - (isMobile ? 44 : 48);
+    barGfx.fillStyle(0x0f172a, 0.85);
+    barGfx.fillRoundedRect(fsX, 12, 40, 40, 8);
+    barGfx.lineStyle(1.5, 0x00f0ff, 0.8);
+    barGfx.strokeRoundedRect(fsX, 12, 40, 40, 8);
+
+    const fsBtn = scene.add.text(fsX + 10, 20, '⛶', {
+      fontSize: '18px', color: '#00f0ff'
+    }).setDepth(31).setInteractive({ useHandCursor: true });
+    fsBtn.on('pointerdown', () => {
+      if (scene.scale.isFullscreen) {
+        scene.scale.stopFullscreen();
+      } else {
+        scene.scale.startFullscreen();
+      }
+    });
+
     // ── 4. HEALTH LIVES CARD (Centered in remaining gap) ──
     const availLeft = multX + multW + 6;
     const availRight = pauseX - 6;

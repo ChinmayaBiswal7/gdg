@@ -222,7 +222,12 @@ export default class SplashScene extends Phaser.Scene {
 
     zone.on('pointerover', () => draw(0xfacc15, 0xffffff));
     zone.on('pointerout',  () => draw(0xf59e0b, 0xfde047));
-    zone.on('pointerdown', () => this._launchGame());
+    zone.on('pointerdown', () => {
+      if (!this.scale.isFullscreen) {
+        try { this.scale.startFullscreen(); } catch (e) {}
+      }
+      this._launchGame();
+    });
 
     // Pulse breathing on play button
     this.tweens.add({

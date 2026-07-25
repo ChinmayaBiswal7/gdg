@@ -148,6 +148,9 @@ export default class MenuScene extends Phaser.Scene {
     });
     zone.on('pointerdown', () => {
       draw(0x002244);
+      if (!this.scale.isFullscreen) {
+        try { this.scale.startFullscreen(); } catch (e) {}
+      }
       this.time.delayedCall(120, cb);
     });
   }
