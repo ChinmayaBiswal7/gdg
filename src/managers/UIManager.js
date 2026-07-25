@@ -6,61 +6,76 @@ export default class UIManager {
     const W = scene.scale.width;
     const H = scene.scale.height;
 
+    const isMobile = W < 520;
     const barGfx = scene.add.graphics().setDepth(30);
 
-    // ── 1. SCORE CARD (Top-Left: x=20, w=120) ──
+    // ── 1. SCORE CARD (Top-Left) ──
+    const scoreW = isMobile ? 88 : 120;
+    const scoreX = 10;
     barGfx.fillStyle(0x0f172a, 0.85);
-    barGfx.fillRoundedRect(20, 16, 120, 44, 10);
+    barGfx.fillRoundedRect(scoreX, 12, scoreW, 40, 8);
     barGfx.lineStyle(1.5, 0xfacc15, 0.7);
-    barGfx.strokeRoundedRect(20, 16, 120, 44, 10);
+    barGfx.strokeRoundedRect(scoreX, 12, scoreW, 40, 8);
 
-    scene.add.text(28, 27, '⭐', { fontSize: '18px' }).setDepth(31);
-    this._scoreTxt = scene.add.text(54, 25, '0', {
-      fontFamily: 'monospace', fontSize: '22px',
+    scene.add.text(scoreX + 6, 21, '⭐', { fontSize: isMobile ? '14px' : '18px' }).setDepth(31);
+    this._scoreTxt = scene.add.text(scoreX + (isMobile ? 26 : 32), 20, '0', {
+      fontFamily: 'monospace', fontSize: isMobile ? '16px' : '22px',
       fontStyle: 'bold', color: '#facc15'
     }).setDepth(31);
 
-    // ── 2. MULTIPLIER PILL (Top-Left next to Score: x=148, w=54) ──
+    // ── 2. MULTIPLIER PILL ──
+    const multX = scoreX + scoreW + 6;
+    const multW = isMobile ? 38 : 50;
+    this._multX = multX;
+    this._multW = multW;
+    this._isMobile = isMobile;
     this._multBg = scene.add.graphics().setDepth(30);
     this._drawMultBg(1);
-    this._multTxt = scene.add.text(160, 26, 'x1', {
-      fontFamily: 'monospace', fontSize: '17px', fontStyle: 'bold', color: '#00ff88'
+    this._multTxt = scene.add.text(multX + (isMobile ? 7 : 10), 22, 'x1', {
+      fontFamily: 'monospace', fontSize: isMobile ? '14px' : '17px', fontStyle: 'bold', color: '#00ff88'
     }).setDepth(31);
 
-    // ── 3. HEALTH LIVES CARD (Centered at top W / 2) ──
-    const livesW = 110;
-    const livesX = W / 2 - livesW / 2;
+    // ── 3. PAUSE BUTTON (Top-Right) ──
+    const pauseX = W - (isMobile ? 48 : 56);
     barGfx.fillStyle(0x0f172a, 0.85);
-    barGfx.fillRoundedRect(livesX, 16, livesW, 44, 10);
+    barGfx.fillRoundedRect(pauseX, 12, 40, 40, 8);
+    barGfx.lineStyle(1.5, 0x38bdf8, 0.8);
+    barGfx.strokeRoundedRect(pauseX, 12, 40, 40, 8);
+
+    const pauseBtn = scene.add.text(pauseX + 10, 20, '⏸', {
+      fontSize: '18px', color: '#38bdf8'
+    }).setDepth(31).setInteractive({ useHandCursor: true });
+    pauseBtn.on('pointerdown', () => scene.togglePause());
+
+    // ── 4. HEALTH LIVES CARD (Centered in remaining gap) ──
+    const availLeft = multX + multW + 6;
+    const availRight = pauseX - 6;
+    const centerAreaX = (availLeft + availRight) / 2;
+
+    const livesW = isMobile ? 86 : 106;
+    const livesX = centerAreaX - livesW / 2;
+    barGfx.fillStyle(0x0f172a, 0.85);
+    barGfx.fillRoundedRect(livesX, 12, livesW, 40, 8);
     barGfx.lineStyle(1.5, 0xef4444, 0.6);
-    barGfx.strokeRoundedRect(livesX, 16, livesW, 44, 10);
+    barGfx.strokeRoundedRect(livesX, 12, livesW, 40, 8);
 
     this._hearts = [];
+    const heartSpacing = isMobile ? 22 : 28;
+    const heartStart = livesX + (isMobile ? 10 : 12);
     for (let i = 0; i < 3; i++) {
       this._hearts.push(
-        scene.add.text(livesX + 12 + i * 30, 25, '♥', {
-          fontSize: '20px', color: '#ff4466'
+        scene.add.text(heartStart + i * heartSpacing, 20, '♥', {
+          fontSize: isMobile ? '16px' : '20px', color: '#ff4466'
         }).setDepth(31)
       );
     }
 
-    // ── 4. SHIELD BADGE PILL (Top-Right next to Lives) ──
-    const shieldX = W / 2 + livesW / 2 + 12;
+    // ── 5. SHIELD BADGE PILL ──
+    const shieldX = pauseX - 48;
+    this._shieldX = shieldX;
     this._shieldPill = scene.add.graphics().setDepth(30);
-    this._shieldIcon = scene.add.text(shieldX + 10, 25, '🛡️', { fontSize: '18px' })
+    this._shieldIcon = scene.add.text(shieldX + 10, 20, '🛡️', { fontSize: '18px' })
       .setDepth(31).setVisible(false);
-
-    // ── 5. PAUSE BUTTON (Top-Right: x = W - 64) ──
-    const pauseX = W - 64;
-    barGfx.fillStyle(0x0f172a, 0.85);
-    barGfx.fillRoundedRect(pauseX, 16, 44, 44, 10);
-    barGfx.lineStyle(1.5, 0x38bdf8, 0.8);
-    barGfx.strokeRoundedRect(pauseX, 16, 44, 44, 10);
-
-    const pauseBtn = scene.add.text(pauseX + 11, 24, '⏸', {
-      fontSize: '20px', color: '#38bdf8'
-    }).setDepth(31).setInteractive({ useHandCursor: true });
-    pauseBtn.on('pointerdown', () => scene.togglePause());
 
     // ── Pause Overlay ──
     this._pauseRect = scene.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.75)
@@ -78,9 +93,9 @@ export default class UIManager {
     this._multBg.clear();
     const color = mult > 1 ? 0x06b6d4 : 0x1e293b;
     this._multBg.fillStyle(color, 0.85);
-    this._multBg.fillRoundedRect(148, 16, 54, 44, 10);
+    this._multBg.fillRoundedRect(this._multX, 12, this._multW, 40, 8);
     this._multBg.lineStyle(1.5, mult > 1 ? 0x22d3ee : 0x475569, 0.8);
-    this._multBg.strokeRoundedRect(148, 16, 54, 44, 10);
+    this._multBg.strokeRoundedRect(this._multX, 12, this._multW, 40, 8);
   }
 
   updateScore(score) {
@@ -98,15 +113,13 @@ export default class UIManager {
   }
 
   showShield(active) {
-    const W = this.scene.scale.width;
-    const shieldX = W / 2 + 110 / 2 + 12;
     this._shieldIcon.setVisible(active);
     this._shieldPill.clear();
     if (active) {
       this._shieldPill.fillStyle(0x0284c7, 0.85);
-      this._shieldPill.fillRoundedRect(shieldX, 16, 44, 44, 10);
+      this._shieldPill.fillRoundedRect(this._shieldX, 12, 40, 40, 8);
       this._shieldPill.lineStyle(1.5, 0x38bdf8, 0.9);
-      this._shieldPill.strokeRoundedRect(shieldX, 16, 44, 44, 10);
+      this._shieldPill.strokeRoundedRect(this._shieldX, 12, 40, 40, 8);
     }
   }
 

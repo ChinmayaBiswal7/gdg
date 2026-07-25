@@ -31,12 +31,14 @@ export default class GameScene extends Phaser.Scene {
     const W = this.scale.width;
     const H = this.scale.height;
 
+    const isMobile = W < 600;
+
     // Dynamic wide projection values based on window scale
-    this.VP       = { x: W / 2, y: H * 0.28 };
+    this.VP       = { x: W / 2, y: isMobile ? H * 0.22 : H * 0.28 };
     this.PLAYER_Y = H * 0.84;
 
-    // Wide track geometry for PC & Mobile
-    const trackW  = Math.min(W * 0.58, 680);
+    // Wide track geometry for Mobile (85% screen width) & PC
+    const trackW  = isMobile ? W * 0.85 : Math.min(W * 0.58, 680);
     this.LANE_X   = [W / 2 - trackW * 0.33, W / 2, W / 2 + trackW * 0.33];
     this.ROAD_L   = W / 2 - trackW * 0.5;
     this.ROAD_R   = W / 2 + trackW * 0.5;

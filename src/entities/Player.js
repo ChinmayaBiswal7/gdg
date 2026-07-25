@@ -34,9 +34,11 @@ export default class Player {
     // Dynamic dust graphics for slide / landing
     this._dustGfx = scene.add.graphics().setDepth(13);
 
-    // Squash & Stretch scale factors
-    this._scaleX = 1.45;
-    this._scaleY = 1.45;
+    // Mobile-adaptive character scale
+    const isMobile = scene.scale.width < 600;
+    this.baseScale = isMobile ? 0.95 : 1.45;
+    this._scaleX   = this.baseScale;
+    this._scaleY   = this.baseScale;
   }
 
   startRocketFlight() {
@@ -118,8 +120,10 @@ export default class Player {
       this.sprite.y = (this.scene.PLAYER_Y - 95) + Math.sin(Date.now() * 0.006) * 8;
     }
 
-    // Smoothly return scale to 1.45 (or 1.6 for rocket)
-    const targetScale = this.isFlyingRocket ? 1.6 : 1.45;
+    // Smoothly return scale to base scale (0.95 mobile / 1.45 desktop)
+    const isMobile    = this.scene.scale.width < 600;
+    const baseTarget  = isMobile ? 0.95 : 1.45;
+    const targetScale = this.isFlyingRocket ? (isMobile ? 1.15 : 1.6) : baseTarget;
     this._scaleX += (targetScale - this._scaleX) * dt * 10;
     this._scaleY += (targetScale - this._scaleY) * dt * 10;
     this.sprite.setScale(this._scaleX, this._scaleY);
